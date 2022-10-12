@@ -19,26 +19,20 @@ import (
 )
 
 var (
-	clientID     string
-	clientSecret string
-	userID       string
-
+	clientID      string
+	clientSecret  string
+	userID        string
+	port          string
 	authServerURL string
 )
 
 func init() {
 
-	flag.StringVar(&clientID, "i", "", "client id")
-
-	flag.StringVar(&clientSecret, "s", "", "client secret")
-
-	flag.StringVar(&userID, "u", "", "user id")
-
-	flag.StringVar(&authServerURL, "auth-url", "", "client serve port")
-
-	flag.Usage = usage
-
-	flag.Parse()
+	clientID = os.Getenv("CLIENT_ID")
+	clientSecret = os.Getenv("CLIENT_SECRET")
+	userID = os.Getenv("USER_ID")
+	port = os.Getenv("PORT")
+	authServerURL = os.Getenv("AUTH_URL")
 
 	if len(clientID) == 0 {
 		panic("client id is empty")
@@ -54,6 +48,10 @@ func init() {
 
 	if len(authServerURL) == 0 {
 		panic("auth server url is empty")
+	}
+
+	if len(port) == 0 {
+		panic("serve port is empty")
 	}
 }
 
@@ -177,7 +175,7 @@ func main() {
 	})
 
 	// log.Printf("Client is running at %s port.Please open http://localhost:%s", port, port)
-	log.Fatal(e.Start(":" + os.Getenv("PORT")))
+	log.Fatal(e.Start(":" + port))
 }
 
 func genCodeChallengeS256(s string) string {

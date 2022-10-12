@@ -5,7 +5,6 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -54,15 +53,6 @@ func init() {
 		panic("serve port is empty")
 	}
 }
-
-// 印出預設的說明
-func usage() {
-	fmt.Fprintf(os.Stderr, "Usage: oa2cli [options] \n")
-	fmt.Fprintf(os.Stderr, "  Currently, the following flags can be used\n")
-	flag.PrintDefaults()
-}
-
-const ()
 
 var (
 	config = oauth2.Config{
@@ -173,7 +163,7 @@ func main() {
 		io.Copy(w, resp.Body)
 		return nil
 	})
-
+	printPrettyEnv()
 	// log.Printf("Client is running at %s port.Please open http://localhost:%s", port, port)
 	log.Fatal(e.Start(":" + port))
 }
@@ -193,6 +183,20 @@ func prettyPrintToken(token *oauth2.Token) {
 
 	// Set Headers
 	tabulate.SetHeaders([]string{"Access Token", "Refresh Token", "Expiry", "Token Type"})
+
+	// Render
+	fmt.Println(tabulate.Render("simple"))
+}
+
+func printPrettyEnv() {
+	// Some Strings
+	string_1 := []string{clientID, clientSecret, userID, port, authServerURL}
+
+	// Create Object
+	tabulate := gotabulate.Create([][]string{string_1})
+
+	// Set Headers
+	tabulate.SetHeaders([]string{"CLIENT_ID", "CLIENT_SECRET", "USER_ID", "PORT", "AUTH_URL"})
 
 	// Render
 	fmt.Println(tabulate.Render("simple"))

@@ -54,8 +54,10 @@ func init() {
 	}
 }
 
-var (
-	config = oauth2.Config{
+var globalToken *oauth2.Token // Non-concurrent security
+
+func main() {
+	config := oauth2.Config{
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
 		Endpoint: oauth2.Endpoint{
@@ -64,10 +66,6 @@ var (
 			AuthStyle: oauth2.AuthStyleInParams,
 		},
 	}
-	globalToken *oauth2.Token // Non-concurrent security
-)
-
-func main() {
 
 	e := echo.New()
 

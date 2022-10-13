@@ -120,7 +120,14 @@ func main() {
 
 		prettyPrintToken(globalToken)
 
-		c.Response().Write([]byte("OK"))
+		type oauthResponse struct {
+			Success bool `json:"success"`
+		}
+
+		respData := oauthResponse{true}
+		data, _ := json.Marshal(respData)
+
+		c.Response().Write(data)
 
 		return nil
 	})

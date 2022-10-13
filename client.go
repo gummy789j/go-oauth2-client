@@ -93,6 +93,11 @@ func main() {
 
 		log.Println(c.Request().URL.RawQuery)
 
+		if err := c.Request().ParseForm(); err != nil {
+			http.Error(c.Response().Writer, "Parse Form Failed", http.StatusBadRequest)
+			return nil
+		}
+
 		state := c.Request().Form.Get("state")
 		if state != "xyz" {
 			http.Error(c.Response().Writer, "State invalid", http.StatusBadRequest)

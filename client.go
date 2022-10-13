@@ -120,6 +120,8 @@ func main() {
 
 		prettyPrintToken(globalToken)
 
+		c.Response().Header().Set("Content-Type", "application/json")
+
 		type oauthResponse struct {
 			Success bool `json:"success"`
 		}

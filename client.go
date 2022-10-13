@@ -91,11 +91,14 @@ func main() {
 
 	e.GET("/oauth", func(c echo.Context) error {
 
+		log.Println(c.Request().URL.RawQuery)
+
 		state := c.Request().Form.Get("state")
 		if state != "xyz" {
 			http.Error(c.Response().Writer, "State invalid", http.StatusBadRequest)
 			return nil
 		}
+
 		code := c.Request().Form.Get("code")
 		if code == "" {
 			http.Error(c.Response().Writer, "Code not found", http.StatusBadRequest)

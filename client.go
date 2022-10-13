@@ -18,11 +18,13 @@ import (
 )
 
 var (
-	clientID      string
-	clientSecret  string
-	userID        string
-	port          string
-	authServerURL string
+	clientID          string
+	clientSecret      string
+	userID            string
+	port              string
+	authServerURL     string
+	tokenServerURL    string
+	resourceServerURL string
 )
 
 func init() {
@@ -32,6 +34,9 @@ func init() {
 	userID = os.Getenv("USER_ID")
 	port = os.Getenv("PORT")
 	authServerURL = os.Getenv("AUTH_URL")
+	tokenServerURL = os.Getenv("TOKEN_URL")
+
+	resourceServerURL = tokenServerURL
 
 	if len(clientID) == 0 {
 		panic("client id is empty")
@@ -49,9 +54,14 @@ func init() {
 		panic("auth server url is empty")
 	}
 
+	if len(tokenServerURL) == 0 {
+		panic("token server url is empty")
+	}
+
 	if len(port) == 0 {
 		panic("serve port is empty")
 	}
+
 }
 
 var globalToken *oauth2.Token // Non-concurrent security
@@ -61,8 +71,8 @@ func main() {
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
 		Endpoint: oauth2.Endpoint{
-			AuthURL:   authServerURL + "/v1/oauth/authorize",
-			TokenURL:  authServerURL + "/v1/oauth/token",
+			AuthURL:   authServerURL + "/oauth/authorize",
+			TokenURL:  tokenServerURL + "/v1/oauth/token",
 			AuthStyle: oauth2.AuthStyleInParams,
 		},
 	}
@@ -143,7 +153,7 @@ func main() {
 			http.Redirect(w, r, "/", http.StatusFound)
 			return nil
 		}
-		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v1/oauth/exchange/account", authServerURL), nil)
+		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v1/oauth/exchange/account", resourceServerURL), nil)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return nil

@@ -33,7 +33,6 @@ func init() {
 
 	clientID = os.Getenv("CLIENT_ID")
 	clientSecret = os.Getenv("CLIENT_SECRET")
-	userID = os.Getenv("USER_ID")
 	port = os.Getenv("PORT")
 	authServerURL = os.Getenv("AUTH_URL")
 	tokenServerURL = os.Getenv("TOKEN_URL")
@@ -47,10 +46,6 @@ func init() {
 
 	if len(clientSecret) == 0 {
 		panic("client secret is empty")
-	}
-
-	if len(userID) == 0 {
-		panic("user id is empty")
 	}
 
 	if len(authServerURL) == 0 {
@@ -92,7 +87,7 @@ func main() {
 
 	e.GET("/", func(c echo.Context) error {
 
-		userID := c.QueryParam("user_id")
+		userID = c.QueryParam("user_id")
 
 		ops := []oauth2.AuthCodeOption{
 			oauth2.SetAuthURLParam("code_challenge", genCodeChallengeS256(codeVerifier)),

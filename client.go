@@ -25,6 +25,8 @@ var (
 	authServerURL     string
 	tokenServerURL    string
 	resourceServerURL string
+	codeVerifier      string
+	expectedState     string
 )
 
 func init() {
@@ -35,7 +37,8 @@ func init() {
 	port = os.Getenv("PORT")
 	authServerURL = os.Getenv("AUTH_URL")
 	tokenServerURL = os.Getenv("TOKEN_URL")
-
+	codeVerifier = os.Getenv("CODE_VERIFIER")
+	expectedState = os.Getenv("STATE")
 	resourceServerURL = tokenServerURL
 
 	if len(clientID) == 0 {
@@ -62,6 +65,14 @@ func init() {
 		panic("serve port is empty")
 	}
 
+	if len(codeVerifier) == 0 {
+		codeVerifier = "s256example"
+	}
+
+	if len(expectedState) == 0 {
+		expectedState = "xyz"
+	}
+
 }
 
 var globalToken *oauth2.Token // Non-concurrent security
@@ -80,10 +91,18 @@ func main() {
 	e := echo.New()
 
 	e.GET("/", func(c echo.Context) error {
-		u := config.AuthCodeURL("xyz",
-			oauth2.SetAuthURLParam("code_challenge", genCodeChallengeS256("s256example")),
-			oauth2.SetAuthURLParam("user_id", userID),
-		)
+
+		userID := c.QueryParam("user_id")
+
+		ops := []oauth2.AuthCodeOption{
+			oauth2.SetAuthURLParam("code_challenge", genCodeChallengeS256(codeVerifier)),
+		}
+
+		if len(userID) > 0 {
+			ops = append(ops, oauth2.SetAuthURLParam("user_id", userID))
+		}
+
+		u := config.AuthCodeURL(expectedState, ops...)
 		http.Redirect(c.Response().Writer, c.Request(), u, http.StatusFound)
 
 		return nil
@@ -99,7 +118,7 @@ func main() {
 		}
 
 		state := c.Request().Form.Get("state")
-		if state != "xyz" {
+		if state != expectedState {
 			http.Error(c.Response().Writer, "State invalid", http.StatusBadRequest)
 			return nil
 		}
@@ -110,7 +129,7 @@ func main() {
 			return nil
 		}
 
-		token, err := config.Exchange(context.Background(), code, oauth2.SetAuthURLParam("code_verifier", "s256example"))
+		token, err := config.Exchange(context.Background(), code, oauth2.SetAuthURLParam("code_verifier", codeVerifier))
 		if err != nil {
 			http.Error(c.Response().Writer, err.Error(), http.StatusInternalServerError)
 			return nil
